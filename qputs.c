@@ -7,38 +7,8 @@
 
 
 #include "defs.h"
+#include <stdio.h>
 
-#ifdef TERMIOS
-#include <sys/types.h>
-#include <termios.h>
-
-struct termios ntios, otios;
-
-void
-init_io()
-{
-	if (tcgetattr(0, &otios)) {
-		printf("Oops\n");
-		exit(2);
-	}
-
-	ntios = otios;
-	ntios.c_cc[VMIN] = 0;
-	ntios.c_cc[VTIME] = 0;
-	ntios.c_lflag &= ~ECHO;
-	
-	if (tcsetattr(0, TCSANOW, &ntios)) {
-		printf("Oops\n");
-		exit(2);
-	}
-}
-
-void
-fini_io()
-{
-	(void) tcsetattr(0, TCSANOW, otios);
-}
-#endif
 
 /*
 	Special version of qputch that check and collects input before displaying
@@ -61,6 +31,9 @@ qputch(int c)
 	if (c == '\n') qputch('\r');
 #endif
 #ifdef TERMIOS
+	if (inchar == EOF)
+		inchar = getch();
+	fputc(c, stdout);
 #endif
 } /* qputch */
 

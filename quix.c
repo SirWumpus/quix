@@ -10,33 +10,97 @@
 */
 
 #include "defs.h"
+#include <stdio.h>
 
+int QuixCaptured;
+int times;
+int sparxnum;
+int quixnum;
+int menleft;
+int area_left;
+int last_killed;
+int percent;
+int fildes;
+int startdir;
+int siz;
+int maxarea;
+int board[MAX_X][MAX_Y];
+int xmax;
+int ymax;
+int fuse;
+int bord_min;
+int bord_max;
+int line_min;
+int line_max;
+int lastx;
+int lasty;
+int bonus_men;
+int C_UP;
+int C_DOWN;
+int C_LEFT;
+int C_RIGHT;
+int inchar;
 
-void banner()
+/* Note : the score is held in an unsigned integer variable and the
+ * actual value held here is 10 times less than the score displayed
+ * on the screen.  Thus maximum score = 655350.
+ */
+unsigned score;
+
+int     fuse_lit;
+int     nohighscore;
+struct  playertype      player;
+struct  sparxtype       sparx[MAXSPARX];
+struct  quixtype        quix[MAXQUIX];
+struct  scoretype       h_score[10];
+struct  coord           boundary[BOUNDARY_LEN];
+struct  coord           temp[BOUNDARY_LEN];
+
+void
+banner()
 {
-	int c;
+	int c = 0;
 
-	clearscreen();
-	print( "\n\n\n\t\t  QQQQQ    UUU    UUU  IIIII  XXXX  XXXX\n" );
-	print( "\t\t Q     Q    U      U     I      X    X\n" );
-	print( "\t\tQ       Q   U      U     I       X  X\n" );
-	print( "\t\tQ       Q   U      U     I        XX\n" );
-	print( "\t\tQ       Q   U      U     I        XX\n" );
-	print( "\t\tQ     Q Q   U      U     I       X  X\n" );
-	print( "\t\t Q     Q     U    U      I      X    X\n" );
-	print( "\t\t  QQQQQ Q     UUUU     IIIII  XXXX  XXXX\n" );
-	print( "\n\n\n\t\t\t     Version 2.0\n" );
-	print( "\t\t\t  25 September 1988\n\n\n" );
-	print( "\t\t       Original author unknown\n" );
-	print( "\t\tUnix to CP/M port by William (Chomp) King\n" );
-	print( "\t\tCP/M to Atari ST port by Anthony C. Howe\n" );
-	print( "\n\n\t\t\t   '?' for Help\n" );
 	do {
+		if (c != EOF) {
+			clearscreen();
+			print( "\n\n\n\t\t  QQQQQ    UUU    UUU  IIIII  XXXX  XXXX\n" );
+			print( "\t\t Q     Q    U      U     I      X    X\n" );
+			print( "\t\tQ       Q   U      U     I       X  X\n" );
+			print( "\t\tQ       Q   U      U     I        XX\n" );
+			print( "\t\tQ       Q   U      U     I        XX\n" );
+			print( "\t\tQ     Q Q   U      U     I       X  X\n" );
+			print( "\t\t Q     Q     U    U      I      X    X\n" );
+			print( "\t\t  QQQQQ Q     UUUU     IIIII  XXXX  XXXX\n" );
+			print( "\n\n\n\t\t\t     Version 2.0\n" );
+			print( "\t\t\t  25 September 1988\n\n\n" );
+			print( "\t\t       Original author unknown\n" );
+			print( "\t\tUnix to CP/M port by William (Chomp) King\n" );
+			print( "\t\tCP/M to Atari ST port by Anthony C. Howe\n" );
+			print( "\n\n\t\t\t  SPACE to Start" );
+			print( "\n\n\t\t\t   '?' for Help\n" );
+		}
+
 		c = getch();
+
+		switch (c) {
+		case ESC:
+			quit();
+
+		case 0x12:
+			change_keys();
+			break;
+
+		case '?':
+			help();
+			break;
 #ifdef DEBUG
-		if( c == '+' ) ++quixnum;
+		case '+':
+			++quixnum;
+			break;
 #endif
-	} while(  c != ' ' );
+		}
+	} while (c != ' ');
 } /* banner */
 
 
@@ -44,7 +108,12 @@ void banner()
 udelay(d)
 int d;
 {
-	for (d *= UDELAY_FACTOR; d; --d);
+#ifdef UDELAY_FACTOR
+	for (d *= UDELAY_FACTOR; 0 < d; --d)
+		;
+#else
+	usleep(d * 1000);
+#endif
 }
 
 
@@ -314,9 +383,8 @@ int     dx, dy;
                 return(UP);
 }
 
-
-
-help()
+void
+help(void)
 {
         clearscreen();
         print( "Try to fill in over 75% of the screen\n");
@@ -340,10 +408,8 @@ help()
         print( "\nI'd give up if I were you.");
         move(1, ymax );
         print( "----- hit space to continue -----" );
-        while( getch() != ' ' );
-        print( "\rOuch!!!!!!!!!!! Not so hard, please!!! Try again." );
-        while( getch() != ' ' );
-        drawscreen();
+        while (getch() != ' ')
+        	;
 }
 
 
@@ -373,11 +439,14 @@ put_at(x, y, ch)
 } /* put_at */
 
 
-void main()
+int
+main()
 {
 	register char   ch;
 
+#ifdef CURSOROFF
 	puts (CURSOROFF);
+#endif
 	init();
 	banner();
 
@@ -414,8 +483,12 @@ void main()
 		} while (ch != 'y' && ch != 'n' && ch != 'Y' && ch != 'N');
 	} while (ch != 'n' && ch != 'N');
 
+#ifdef CURSORON
 	puts (CURSORON);
+#endif
 	quit();
+
+	return 0;
 }
 
 

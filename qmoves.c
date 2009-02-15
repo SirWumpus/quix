@@ -6,6 +6,7 @@
 */
 
 #include "defs.h"
+#include <stdio.h>
 
 short had_go;
 
@@ -17,7 +18,7 @@ process_command()
         i = inchar;
         if (i > 0)
         {
-                inchar = -1;
+                inchar = EOF;
                 had_go = TRUE;
                 switch (i)
                 {
@@ -25,17 +26,18 @@ process_command()
                                 score = 0;
                         /*      highscores();   */
 
+#ifdef CURSORON
                                 puts (CURSORON);
-
+#endif
                                 quit();
-                                break;
-
-                        case 0x04:
-                                drawscreen();
                                 break;
 
                         case 0x12:
                                 change_keys();
+				/*@fallthrough@*/
+
+                        case 0x04:
+                                drawscreen();
                                 break;
 
 #ifdef DEBUG
@@ -49,6 +51,7 @@ process_command()
 
                         case '?':
                                 help();
+			        drawscreen();
                                 break;
 
                         default:
@@ -66,44 +69,36 @@ process_command()
         }
 }
 
-
-
-change_keys()
+void
+change_keys(void)
 {
         clearscreen();
 
-        print("Redefine keys\n");
-        print("-------------");
+	set_io(1);
+        printf("Redefine keys\n");
+        printf("-------------\n");
 
-        move(1,4);
-        print("UP    = ");
-        qputch(C_UP);
-        print(" , alter to : ");
+        printf("\nUP    = %c set to: ", C_UP);
         C_UP=getch();
+        putchar(C_UP);
 
-        move(1,6);
-        print("DOWN  = ");
-        qputch(C_DOWN);
-        print(" , alter to : ");
+        printf("\n\nDOWN  = %c set to: ", C_DOWN);
         C_DOWN=getch();
+        putchar(C_DOWN);
 
-        move(1,8);
-        print("LEFT  = ");
-        qputch(C_LEFT);
-        print(" , alter to : ");
+        printf("\n\nLEFT  = %c set to: ", C_LEFT);
         C_LEFT=getch();
+        putchar(C_LEFT);
 
-        move(1,10);
-        print("RIGHT = ");
-        qputch(C_RIGHT);
-        print(" , alter to : ");
+        printf("\n\nRIGHT = %c set to: ", C_RIGHT);
         C_RIGHT=getch();
+        putchar(C_RIGHT);
 
-        nap( 10 );
-        drawscreen();
+	set_io(0);
+        printf("\n\n----- hit space to continue -----");
+        while (getch() != ' ')
+        	;
 }
-
-
 
 int
 moveplayer()

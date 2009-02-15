@@ -8,34 +8,61 @@
 	891216	ACH		Tidied up code for Sozobon C and general release of source
 */
 
+#if !defined(ATARI_ST)
+#define ANSI
+#define TERMIOS
+#endif
+
 #ifdef ATARI_ST
-#include <osbind.h>
+# include <osbind.h>
+
+# define UDELAY_FACTOR		125
 #endif
 
 #undef	DEBUG
 #define NAP_FACTOR		3275
-#define UDELAY_FACTOR	125
 
 /* Terminal Definitions. */
 #define TWIDTH	80
 #define TLENGTH 25
-#define CLEARS  "\033E"
-#define INTOREV	"\033p"
-#define OUTAREV "\033q"
-#define CURSOROFF "\033f"
-#define CURSORON "\033e"
+
+#if defined(ANSI)
+#define HOME		"\033[H"
+#define CLEARS  	"\033[2J"
+#define INTOREV		"\033[7m"
+#define OUTAREV 	"\033[0m"
+#endif
+
+#if defined(VT52) || defined(ATARI_ST)
+#define HOME		"\033H"
+#define CLEARS  	"\033E"
+#define INTOREV		"\033p"
+#define OUTAREV 	"\033q"
+#define CURSOROFF 	"\033f"
+#define CURSORON 	"\033e"
+#endif
+
 #define ESC		'\033'
+
 
 
 #define WIDTH           38      /* Actual number of COLUMNS on your */
                                 /* terminal - 2 (80 / 2 - 2)        */
 #define HEIGHT          23      /* Actual number of ROWS on your    */
                                 /* terminal - 2                     */
-
+#if defined(ATARI_ST)
 #define INT_UP          '8'     /* Initial key for UP    movement */
 #define INT_DOWN        '2'     /*    "     "   "  DOWN     "     */
 #define INT_LEFT        '4'     /*    "     "   "  LEFT     "     */
 #define INT_RIGHT       '6'     /*    "     "   "  RIGHT    "     */
+
+#else
+
+#define INT_UP          'w'     /* Initial key for UP    movement */
+#define INT_DOWN        'z'     /*    "     "   "  DOWN     "     */
+#define INT_LEFT        'a'     /*    "     "   "  LEFT     "     */
+#define INT_RIGHT       's'     /*    "     "   "  RIGHT    "     */
+#endif
 
 #define INITMEN         5
 #define BONUS_MAN       1000    /* NOTE : means every 20000! */
@@ -110,49 +137,51 @@ struct  quixtype
                 struct  coord   posit[QUIXLEN];
         };
 
-int		QuixCaptured;
-int     times;
-int     sparxnum;
-int     quixnum;
-int     menleft;
-int     area_left;
-int     last_killed;
-int     percent;
-int     fildes;
-int     startdir;
-int     siz;
-int     maxarea;
-int     board[MAX_X][MAX_Y];
-int     xmax;
-int     ymax;
-int     fuse;
-int     bord_min;
-int     bord_max;
-int     line_min;
-int     line_max;
-int     lastx;
-int     lasty;
-int     bonus_men;
-int     C_UP;
-int     C_DOWN;
-int     C_LEFT;
-int     C_RIGHT;
-int     inchar;
-unsigned        score;
+extern int QuixCaptured;
+extern int times;
+extern int sparxnum;
+extern int quixnum;
+extern int menleft;
+extern int area_left;
+extern int last_killed;
+extern int percent;
+extern int fildes;
+extern int startdir;
+extern int siz;
+extern int maxarea;
+extern int board[MAX_X][MAX_Y];
+extern int xmax;
+extern int ymax;
+extern int fuse;
+extern int bord_min;
+extern int bord_max;
+extern int line_min;
+extern int line_max;
+extern int lastx;
+extern int lasty;
+extern int bonus_men;
+extern int C_UP;
+extern int C_DOWN;
+extern int C_LEFT;
+extern int C_RIGHT;
+extern int inchar;
+extern unsigned score;
 
-/*      Note : the score is held in an unsigned integer variable and the
- *      actual value held here is 10 times less than the score displayed
- *      on the screen.  Thus maximum score = 655350.
- */
+extern int     fuse_lit;
+extern int     nohighscore;
+extern struct  playertype      player;
+extern struct  sparxtype       sparx[MAXSPARX];
+extern struct  quixtype        quix[MAXQUIX];
+extern struct  scoretype       h_score[10];
+extern struct  coord           boundary[BOUNDARY_LEN];
+extern struct  coord           temp[BOUNDARY_LEN];
 
-int     fuse_lit;
-int     nohighscore;
-struct  playertype      player;
-struct  sparxtype       sparx[MAXSPARX];
-struct  quixtype        quix[MAXQUIX];
-struct  scoretype       h_score[10];
-struct  coord           boundary[BOUNDARY_LEN];
-struct  coord           temp[BOUNDARY_LEN];
+extern void help(void);
+extern void init_io(void);
+extern void fini_io(void);
+extern void set_io(int wait);
+extern void change_keys(void);
+
 
 
 /* End of defintions */

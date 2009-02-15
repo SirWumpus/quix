@@ -7,22 +7,85 @@
 */
 
 #include "defs.h"
+#include <stdio.h>
+#include <unistd.h>
 
+#ifdef TERMIOS
+#include <sys/types.h>
+#include <termios.h>
 
-void quit()
+struct termios ntios, otios;
+#endif
+
+void
+set_io(int wait)
+{
+#ifdef TERMIOS
+	ntios = otios;
+	ntios.c_cc[VMIN] = wait;
+	ntios.c_cc[VTIME] = 0;
+	ntios.c_lflag &= ~(ECHO|ICANON);
+/*	ntios.c_oflag &= ~(OPOST); */
+
+	if (tcsetattr(0, TCSANOW, &ntios)) {
+		printf("Oops\n");
+		exit(2);
+	}
+#endif
+}
+
+void
+init_io(void)
+{
+	setvbuf(stdout, NULL, _IONBF, 0);
+
+#ifdef TERMIOS
+	if (tcgetattr(0, &otios)) {
+		printf("Oops\n");
+		exit(2);
+	}
+
+	set_io(0);
+#endif
+}
+
+void
+fini_io(void)
+{
+#ifdef TERMIOS
+	(void) tcsetattr(0, TCSANOW, &otios);
+#endif
+}
+
+int
+getch()
+{
+#ifdef TERMIOS
+	unsigned char ch;
+
+	if (read(STDIN_FILENO, &ch, 1) == 1)
+		return ch;
+
+	return EOF;
+#endif
+}
+
+void
+quit()
 {
 	clearscreen();
-	exit( 0 );
-} /* quit */
+	fini_io();
+	exit(0);
+}
 
-
-
-void init()
+void
+init()
 {
 	int     i;
 
-	/* Initialise ALL variables */
+	init_io();
 
+	/* Initialise ALL variables */
 	times=sparxnum=quixnum=menleft=area_left=last_killed=0;
 	percent=fildes=startdir=siz=maxarea=xmax=ymax=fuse=0;
 	bord_min=bord_max=line_min=line_max=lastx=lasty=0;
@@ -38,6 +101,7 @@ void init()
 		temp[i].x=temp[i].y=0;
 	} /* for */
 
+	inchar	= EOF;
 	C_UP    = INT_UP;
 	C_DOWN  = INT_DOWN;
 	C_LEFT  = INT_LEFT;
@@ -56,7 +120,12 @@ void init()
 nap( x )
 	unsigned x;
 {
-	for (x *= NAP_FACTOR; x; x--); 
+#ifdef HAVE_USLEEP
+	usleep(x * NAP_FACTOR);
+#else
+	for (x *= NAP_FACTOR; x; x--)
+		;
+#endif
 } /* nap */
 
 
@@ -78,11 +147,18 @@ int     y;
 	Cconout( y +32 );
 	Cconout( x +32 );
 #endif
+#ifdef VT52
+	printf("\033Y%c%c", y+32, x+32);
+#endif
+#ifdef ANSI
+	printf("\033[%d;%dH", y+1, x+1);
+#endif
 } /* move */
 
 
 clearscreen()
 {
+	print(HOME);
 	print(CLEARS);
 } /* clearscreen */
 
