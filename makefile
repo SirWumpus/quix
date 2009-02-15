@@ -2,11 +2,11 @@
 
 .SUFFIXES :
 O = .o
-E = 
+E =
 .SUFFIXES : .c $O $E
 
 CFLAGS = -g
-LDFLAGS = 
+LDFLAGS =
 
 H = defs.h
 SRC = quix.c qarea.c qio.c qputs.c qmoves.c
@@ -16,11 +16,14 @@ OBJ = quix$O qarea$O qio$O qputs$O qmoves$O
 
 build: quix$E
 
-clean: 
+clean:
 	-rm -f ${OBJ}
 
 distclean: clean
 	-rm -f quix$E
+
+tar:
+	tar -zcf quix.tar.gz makefile *.h *.c *.txt
 
 quix$E: ${OBJ}
 	${CC} ${LDFLAGS} -o quix$E ${OBJ}
@@ -39,3 +42,4 @@ qputs$O : defs.h qputs.c
 
 qmoves$O : defs.h qmoves.c
 	${CC} ${CFLAGS} -c qmoves.c
+
