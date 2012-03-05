@@ -32,7 +32,7 @@ qputch(int c)
 #endif
 #ifdef TERMIOS
 	if (inchar == EOF)
-		inchar = getch();
+		inchar = getkey();
 	fputc(c, stdout);
 #endif
 } /* qputch */

@@ -79,24 +79,24 @@ change_keys(void)
         printf("-------------\n");
 
         printf("\nUP    = %c set to: ", C_UP);
-        C_UP=getch();
+        C_UP=getkey();
         putchar(C_UP);
 
         printf("\n\nDOWN  = %c set to: ", C_DOWN);
-        C_DOWN=getch();
+        C_DOWN=getkey();
         putchar(C_DOWN);
 
         printf("\n\nLEFT  = %c set to: ", C_LEFT);
-        C_LEFT=getch();
+        C_LEFT=getkey();
         putchar(C_LEFT);
 
         printf("\n\nRIGHT = %c set to: ", C_RIGHT);
-        C_RIGHT=getch();
+        C_RIGHT=getkey();
         putchar(C_RIGHT);
 
 	set_io(0);
         printf("\n\n----- hit space to continue -----");
-        while (getch() != ' ')
+        while (getkey() != ' ')
         	;
 }
 

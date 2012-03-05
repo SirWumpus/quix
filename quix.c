@@ -81,7 +81,7 @@ banner()
 			print( "\n\n\t\t\t   '?' for Help\n" );
 		}
 
-		c = getch();
+		c = getkey();
 
 		switch (c) {
 		case ESC:
@@ -302,7 +302,7 @@ get_bonus()
 
 	move( 8, TLENGTH -4 );
 	print( "--- press space bar ---" );
-	while( getch() != ' ' );
+	while( getkey() != ' ' );
 	add_life();
 } /* get_bonus */
 
@@ -408,7 +408,7 @@ help(void)
         print( "\nI'd give up if I were you.");
         move(1, ymax );
         print( "----- hit space to continue -----" );
-        while (getch() != ' ')
+        while (getkey() != ' ')
         	;
 }
 
@@ -451,6 +451,7 @@ main()
 	banner();
 
 	do {
+		set_io(0);
 		menleft = INITMEN;
 		times = score = 0;
 
@@ -472,11 +473,12 @@ main()
 
 /*      highscores();           */
 		move(1, ymax+1);
-		print("Are you so utterly mad as to have another game? (y/n) ");
+		set_io(1);
+		printf("Are you so utterly mad as to have another game? (y/n) ");
 
 		quixnum = 0;
 		do {
-			ch = getch();
+			ch = getkey();
 #ifdef DEBUG
 			if( ch == '+' ) ++quixnum;
 #endif

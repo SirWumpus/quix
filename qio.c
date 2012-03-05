@@ -10,17 +10,25 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#ifdef TERMIOS
-#include <sys/types.h>
-#include <termios.h>
+#ifdef __WIN32__
+# include <conio.h>
 
-struct termios ntios, otios;
+static int wait_key;
+#else
+# include <sys/types.h>
+# include <termios.h>
+
+static struct termios otios;
 #endif
 
 void
 set_io(int wait)
 {
-#ifdef TERMIOS
+#ifdef __WIN32__
+	wait_key = wait;
+#else
+	struct termios ntios;
+
 	ntios = otios;
 	ntios.c_cc[VMIN] = wait;
 	ntios.c_cc[VTIME] = 0;
@@ -37,6 +45,7 @@ set_io(int wait)
 void
 init_io(void)
 {
+	setvbuf(stdin, NULL, _IONBF, 0);
 	setvbuf(stdout, NULL, _IONBF, 0);
 
 #ifdef TERMIOS
@@ -57,18 +66,31 @@ fini_io(void)
 #endif
 }
 
+#ifdef __WIN32__
+
 int
-getch()
+getkey(void)
 {
-#ifdef TERMIOS
+	if (wait_key || kbhit())
+		return getch();
+
+	return EOF;
+}
+
+#else
+
+int
+getkey()
+{
 	unsigned char ch;
 
 	if (read(STDIN_FILENO, &ch, 1) == 1)
 		return ch;
 
 	return EOF;
-#endif
 }
+
+#endif
 
 void
 quit()
