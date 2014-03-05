@@ -59,9 +59,9 @@
 #else
 
 #define INT_UP          'w'     /* Initial key for UP    movement */
-#define INT_DOWN        'z'     /*    "     "   "  DOWN     "     */
+#define INT_DOWN        's'     /*    "     "   "  DOWN     "     */
 #define INT_LEFT        'a'     /*    "     "   "  LEFT     "     */
-#define INT_RIGHT       's'     /*    "     "   "  RIGHT    "     */
+#define INT_RIGHT       'd'     /*    "     "   "  RIGHT    "     */
 #endif
 
 #define INITMEN         5
