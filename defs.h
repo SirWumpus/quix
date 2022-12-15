@@ -31,6 +31,8 @@
 #define CLEARS  	"\033[2J"
 #define INTOREV		"\033[7m"
 #define OUTAREV 	"\033[0m"
+#define CURSOROFF 	"\033[?25l"
+#define CURSORON 	"\033[?25h"
 #endif
 
 #if defined(VT52) || defined(ATARI_ST)
