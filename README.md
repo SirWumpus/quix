@@ -1,25 +1,7 @@
+QUIX
+====
 
-                 QQQQQ    UUU    UUU  IIIII  XXXX  XXXX
-                Q     Q    U      U     I      X    X
-               Q       Q   U      U     I       X  X
-               Q       Q   U      U     I        XX
-               Q       Q   U      U     I        XX
-               Q     Q Q   U      U     I       X  X
-                Q     Q     U    U      I      X    X
-                 QQQQQ Q     UUUU     IIIII  XXXX  XXXX
-
-
-                             Version 2.0
-                          25 September 1986
-
-
-                           Anthony C. Howe
-
-
-
-
-BRIEF
------
+![QUIX Screen](./title_screen.png)
 
 QUIX (Qix on Unix) is based on the arcade game QIX.  It was originally written in UNIX V7 C.  A friend of mine, William (Chomp) King, found it on the Sydney University machine, and managed to acquire and convert it for BDS C v1.45 under CP/M back in 1983/84.  I later ported it to another CP/M machine in 1985, and much later ported to the Atari ST.  I had the game up and running in a few hours so it is quite simple to move from machine to machine for those of you might be interested in trying it on an Amiga or PC.  
 
@@ -30,6 +12,8 @@ This is the general release of the source.  It has been tidied up to compile und
 
 THE GAME
 --------
+
+![Play Screen](./play_screen_1.png)
 
 The object of the game is firstly to survive and secondly to a mass points by filling in the playing area occupied by the QIX without being speared by a SPARX, fizzed by the FUSE or hit by the QIX.
 
