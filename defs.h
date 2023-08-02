@@ -140,7 +140,6 @@ struct  quixtype
         };
 
 extern int QuixCaptured;
-extern int times;
 extern int sparxnum;
 extern int quixnum;
 extern int menleft;
@@ -179,11 +178,31 @@ extern struct  coord           boundary[BOUNDARY_LEN];
 extern struct  coord           temp[BOUNDARY_LEN];
 
 extern void help(void);
+extern void init(void);
+extern void quit(void);
 extern void init_io(void);
 extern void fini_io(void);
+extern void fill_area(void);
+extern void drawscreen(void);
 extern void set_io(int wait);
 extern void change_keys(void);
-
-
+extern void clearscreen(void);
+extern void clearboard(void);
+extern void add_life(void);
+extern void move(int x, int y);
+extern void print(const char *s);
+extern void putint(unsigned i, int n);
+extern void put_at(int x, int y, int ch);
+extern void mvaddch(int x, int y, int ch);
+extern void nap(unsigned int x);
+extern void udelay(int d);
+extern int find(int x1, int y1);
+extern int qputch(int c);
+extern int getkey(void);
+extern int ISBORDER(int X);
+extern int movefuse(void);
+extern int movequix(void);
+extern int movesparx(void);
+extern int moveplayer(void);
 
 /* End of defintions */

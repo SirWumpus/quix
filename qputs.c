@@ -38,16 +38,14 @@ qputch(int c)
 } /* qputch */
 
 
-print(s)
-	register char   *s;
+void
+print(const char *s)
 {
 	for (; *s != '\0'; *s++) qputch(*s);
 } /* print */
 
-
-putint(i, n)
-	register unsigned       i;
-	register int            n;
+void
+putint(unsigned i, int n)
 {
         register int    a;
         register int    j;

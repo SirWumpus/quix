@@ -33,7 +33,8 @@ set_io(int wait)
 	ntios = otios;
 	ntios.c_cc[VMIN] = wait;
 	ntios.c_cc[VTIME] = 0;
-	ntios.c_lflag &= ~(ECHO|ICANON);
+/*	ntios.c_lflag |= ISIG; */
+	ntios.c_lflag &= ~(ICANON|ECHO|ECHONL|ECHOCTL);
 /*	ntios.c_oflag &= ~(OPOST); */
 
 	if (tcsetattr(0, TCSANOW, &ntios)) {
@@ -81,7 +82,7 @@ getkey(void)
 #else
 
 int
-getkey()
+getkey(void)
 {
 	unsigned char ch;
 
@@ -94,22 +95,24 @@ getkey()
 #endif
 
 void
-quit()
+quit(void)
 {
+#ifdef CURSORON
+	puts (CURSORON);
+#endif
 	clearscreen();
 	fini_io();
-	exit(0);
 }
 
 void
-init()
+init(void)
 {
 	int     i;
 
 	init_io();
 
 	/* Initialise ALL variables */
-	times=sparxnum=quixnum=menleft=area_left=last_killed=0;
+	sparxnum=quixnum=menleft=area_left=last_killed=0;
 	percent=fildes=startdir=siz=maxarea=xmax=ymax=fuse=0;
 	bord_min=bord_max=line_min=line_max=lastx=lasty=0;
 	bonus_men=fuse_lit=nohighscore=0;
@@ -139,31 +142,19 @@ init()
 }
 
 
-
-nap( x )
-	unsigned x;
+void
+nap(unsigned int x)
 {
 #ifdef HAVE_USLEEP
-	usleep(x * NAP_FACTOR);
+	(void) usleep(x * NAP_FACTOR);
 #else
 	for (x *= NAP_FACTOR; x; x--)
 		;
 #endif
 } /* nap */
 
-
-
-terror(msg)
-char    *msg;
-{
-	print(msg);
-	qputch('\n');
-	exit(1);
-} /* terror */
-
-move(x, y)
-int     x;
-int     y;
+void
+move(int x, int y)
 {
 #ifdef ATARI_ST
 	Cconws( "\033Y" );
@@ -171,30 +162,24 @@ int     y;
 	Cconout( x +32 );
 #endif
 #ifdef VT52
-	printf("\033Y%c%c", y+32, x+32);
+	(void) printf("\033Y%c%c", y+32, x+32);
 #endif
 #ifdef ANSI
-	printf("\033[%d;%dH", y+1, x+1);
+	(void) printf("\033[%d;%dH", y+1, x+1);
 #endif
-} /* move */
+}
 
 
-clearscreen()
+void
+clearscreen(void)
 {
 	print(HOME);
 	print(CLEARS);
 } /* clearscreen */
 
 
-short ISBORDER(X)
-	int X;
+int
+ISBORDER(int X)
 {
 	return ((X) <= bord_max);
 } /* ISBORDER */
-
-short PLAYER_AT(X, Y)
-	int     X;
-	int     Y;
-{
-	return (X == player.x && Y == player.y);
-} /* PLAYER_AT */

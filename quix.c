@@ -11,9 +11,12 @@
 
 #include "defs.h"
 #include <stdio.h>
+#include <stdlib.h>
+#ifdef __unix__
+#include <unistd.h>
+#endif
 
 int QuixCaptured;
-int times;
 int sparxnum;
 int quixnum;
 int menleft;
@@ -85,7 +88,7 @@ banner()
 
 		switch (c) {
 		case ESC:
-			quit();
+			exit(0);
 
 		case 0x12:
 			change_keys();
@@ -104,21 +107,20 @@ banner()
 } /* banner */
 
 
-
-udelay(d)
-int d;
+void
+udelay(int d)
 {
 #ifdef UDELAY_FACTOR
 	for (d *= UDELAY_FACTOR; 0 < d; --d)
 		;
 #else
-	usleep(d * 1000);
+	(void) usleep(d * 1000);
 #endif
 }
 
 
-
-clearboard()
+void
+clearboard(void)
 {
         register int    i;
         register int    j;
@@ -200,9 +202,8 @@ clearboard()
         drawscreen();
 }
 
-
-
-drawscreen()
+void
+drawscreen(void)
 {
         register int    i;
         register int    j;
@@ -229,8 +230,8 @@ drawscreen()
 }
 
 
-
-death()
+static void
+death(void)
 {
         register int    i;
 
@@ -259,21 +260,19 @@ death()
         }
 }
 
-
-
-add_life()
+void
+add_life(void)
 {
 	while( score > BONUS_MAN * bonus_men && menleft <= MAXMEN ){
 		put_at( menleft++, 0, PLAYER );
 		qputch( 7 );
 		nap( 5 );
 		++bonus_men;
-	} /* while */
-} /* add_life */
+	}
+}
 
-
-
-get_bonus()
+static void
+get_bonus(void)
 {
 	clearscreen();
 	move( 8, 4 );
@@ -304,83 +303,6 @@ get_bonus()
 	print( "--- press space bar ---" );
 	while( getkey() != ' ' );
 	add_life();
-} /* get_bonus */
-
-
-
-where_move(direction, dx, dy)
-int     direction;
-int     *dx;
-int     *dy;
-{
-        switch (direction)
-        {
-                case UP:
-                        *dx = 0;
-                        *dy = -1;
-                        break;
-
-                case DOWN:
-                        *dx = 0;
-                        *dy = 1;
-                        break;
-
-                case LEFT:
-                        *dx = -1;
-                        *dy = 0;
-                        break;
-
-                case RIGHT:
-                        *dx = 1;
-                        *dy = 0;
-                        break;
-
-                case UP_LEFT:
-                        *dx = -1;
-                        *dy = -1;
-                        break;
-
-                case UP_RIGHT:
-                        *dx = 1;
-                        *dy = -1;
-                        break;
-
-                case DOWN_LEFT:
-                        *dx = -1;
-                        *dy = 1;
-                        break;
-
-                case DOWN_RIGHT:
-                        *dx = 1;
-                        *dy = 1;
-        }
-}
-
-
-
-there_move(dx, dy)
-int     dx, dy;
-{
-        if (dx>0)
-                if (dy>0)
-                        return(UP_RIGHT);
-                else if (dy)
-                        return(UP_LEFT);
-                else
-                        return(UP);
-        else if (dx)
-                if (dy>0)
-                        return(DOWN_RIGHT);
-                else if (dy)
-                        return(DOWN_LEFT);
-                else
-                        return(DOWN);
-        else if (dy>0)
-                return(RIGHT);
-        else if (dy)
-                return(LEFT);
-        else
-                return(UP);
 }
 
 void
@@ -412,37 +334,30 @@ help(void)
         	;
 }
 
-
-
-mvaddch(x, y, ch)
-register int    x;
-register int    y;
-register char   ch;
+void
+mvaddch(int x, int y, int ch)
 {
         board[x][y] = ch;
         move(2 * x, y);
         qputch(ch);
 }
 
-
-
-put_at(x, y, ch)
-	register int    x;
-	register int    y;
-	register char   ch;
+void
+put_at(int x, int y, int ch)
 {
-	if (ch != SPARX)
-			board[x][y] = ch;
-
+	if (ch != SPARX) {
+		board[x][y] = ch;
+	}
 	move(2 * x, y);
 	qputch(ch);
-} /* put_at */
-
+}
 
 int
-main()
+main(int atrgc, char **argv)
 {
 	register char   ch;
+
+	(void) atexit(quit);
 
 #ifdef CURSOROFF
 	puts (CURSOROFF);
@@ -453,7 +368,7 @@ main()
 	do {
 		set_io(0);
 		menleft = INITMEN;
-		times = score = 0;
+		score = 0;
 
 		for(;;){
 			QuixCaptured = 0;
@@ -484,11 +399,6 @@ main()
 #endif
 		} while (ch != 'y' && ch != 'n' && ch != 'Y' && ch != 'N');
 	} while (ch != 'n' && ch != 'N');
-
-#ifdef CURSORON
-	puts (CURSORON);
-#endif
-	quit();
 
 	return 0;
 }

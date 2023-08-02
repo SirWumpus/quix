@@ -8,6 +8,7 @@
 
 
 #include "defs.h"
+#include <stdlib.h>
 
 #define LINE_BORDER     'L'
 #define BORDER_SOLID    'B'
@@ -25,6 +26,25 @@ short near_border(a, b)
 			(b == bord_max && a == bord_min));
 } /* near_border */
 
+static int
+bound_pos(int x1, int y1)
+{
+	register int            i;
+	register struct coord   *b;
+
+	if (board[x1][y1] == BORDER || board[x1][y1] == BORDER_SOLID) {
+		for (i = bord_min, b = boundary + i; i <= bord_max; i++, b++)
+			if (b->x == x1 && b->y == y1)
+				return i;
+	} else {
+		for (i = line_max + 1, b = boundary + i; i >= line_min; i--, b--)
+			if (b->x == x1 && b->y == y1)
+				return i;
+	} /* if */
+
+	print("\nError in bound_pos()\n");
+	exit(0);
+}
 
 short line_near(i, j, at_border)
 	register int    i;
@@ -73,9 +93,8 @@ short line_near(i, j, at_border)
 } /* line_near */
 
 
-int find(x1, y1)
-	register int    x1;
-	register int    y1;
+int
+find(int x1, int y1)
 {
         register int            i;
         register struct coord   *b;
@@ -84,11 +103,103 @@ int find(x1, y1)
                 if (b->x == x1 && b->y == y1)
                         return i;
         print("\nError in find()\n");
-        quit();
+        exit(0);
 } /* find */
 
+static int
+scan_screen(int draw, int border)
+{
+	register int    i;
+	register int    j;
+	register short  in;
+	register int    area;
+	int             quix_in;
+	int             quix_out;
 
-void fill_area()
+	area = -2;
+	quix_in = 0;
+	quix_out = 0;
+
+	lastx = 0;
+	for (j = 1; j <= ymax; j++) {
+		in = FALSE;
+		for (i = 1; i <= xmax; i++) {
+			int     surface;
+
+			surface = board[i][j];
+
+			if (surface != SOLID && surface != NOTHING &&
+				j < ymax && line_near(i, j, border))
+				in = !in;
+
+			if (draw) {
+				switch (surface) {
+					case NOTHING:
+					case QUIX:
+						if (in) {
+							area++;
+							mvaddch(i, j, SOLID);
+						} /* if */
+						break;
+
+					case BORDER:
+						if (border)
+							mvaddch(i, j, SOLID);
+						break;
+
+					case BORDER_SOLID:
+						if (border)
+							board[i][j] = BORDER;
+						else
+							mvaddch(i, j, SOLID);
+						break;
+
+					case LINE_BORDER:
+						area++;
+						mvaddch(i, j, BORDER);
+				} /* switch */
+			} else {
+				switch (surface) {
+					case NOTHING:
+						if (in) area++;
+						break;
+
+					case LINE_BORDER:
+						area++;
+						break;
+
+					case QUIX:
+						if (in) {
+							area++;
+							quix_in++;
+						} else
+							quix_out++;
+				} /* switch */
+			} /* if */
+		} /* for */
+	} /* for */
+
+	if (!draw) {
+		if (quix_in == 0)
+			return 0;
+		else if (quix_out == 0)
+			return maxarea;
+		else if (quix_in - quix_out > 3)
+			return maxarea;
+		else if (quix_out - quix_in > 3)
+			return 0;
+	} else {
+		score += (area/2) * quixnum;
+		add_life();
+		move(46, 0);
+		putint(score, 1);
+		qputch('0');
+	} /* if */
+	return area;
+}
+
+void
+fill_area(void)
 {
 	unsigned        tpercent;       /* for percent calculation */
 	register int    i;
@@ -208,119 +319,3 @@ void fill_area()
 		} /* if */
 	} /* for */
 } /* fill_area */
-
-
-int scan_screen(draw, border)
-	register short  draw;
-	register short  border;
-{
-	register int    i;
-	register int    j;
-	register short  in;
-	register int    area;
-	int             quix_in;
-	int             quix_out;
-
-	area = -2;
-	quix_in = 0;
-	quix_out = 0;
-
-	lastx = 0;
-	for (j = 1; j <= ymax; j++) {
-		in = FALSE;
-		for (i = 1; i <= xmax; i++) {
-			int     surface;
-
-			surface = board[i][j];
-
-			if (surface != SOLID && surface != NOTHING &&
-				j < ymax && line_near(i, j, border))
-				in = !in;
-
-			if (draw) {
-				switch (surface) {
-					case NOTHING:
-					case QUIX:
-						if (in) {
-							area++;
-							mvaddch(i, j, SOLID);
-						} /* if */
-						break;
-
-					case BORDER:
-						if (border)
-							mvaddch(i, j, SOLID);
-						break;
-
-					case BORDER_SOLID:
-						if (border)
-							board[i][j] = BORDER;
-						else
-							mvaddch(i, j, SOLID);
-						break;
-
-					case LINE_BORDER:
-						area++;
-						mvaddch(i, j, BORDER);
-				} /* switch */
-			} else {
-				switch (surface) {
-					case NOTHING:
-						if (in) area++;
-						break;
-
-					case LINE_BORDER:
-						area++;
-						break;
-
-					case QUIX:
-						if (in) {
-							area++;
-							quix_in++;
-						} else
-							quix_out++;
-				} /* switch */
-			} /* if */
-		} /* for */
-	} /* for */
-
-	if (!draw) {
-		if (quix_in == 0)
-			return 0;
-		else if (quix_out == 0)
-			return maxarea;
-		else if (quix_in - quix_out > 3)
-			return maxarea;
-		else if (quix_out - quix_in > 3)
-			return 0;
-	} else {
-		score += (area/2) * quixnum;
-		add_life();
-		move(46, 0);
-		putint(score, 1);
-		qputch('0');
-	} /* if */
-	return area;
-} /* scan_screen */
-
-
-int bound_pos(x1, y1)
-	register int    x1;
-	register int    y1;
-{
-	register int            i;
-	register struct coord   *b;
-
-	if (board[x1][y1] == BORDER || board[x1][y1] == BORDER_SOLID) {
-		for (i = bord_min, b = boundary + i; i <= bord_max; i++, b++)
-			if (b->x == x1 && b->y == y1)
-				return i;
-	} else {
-		for (i = line_max + 1, b = boundary + i; i >= line_min; i--, b--)
-			if (b->x == x1 && b->y == y1)
-				return i;
-	} /* if */
-
-	print("\nError in bound_pos()\n");
-	quit();
-}

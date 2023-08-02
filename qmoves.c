@@ -7,11 +7,12 @@
 
 #include "defs.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 short had_go;
 
-
-process_command()
+static void
+process_command(void)
 {
         int     i;
 
@@ -29,7 +30,7 @@ process_command()
 #ifdef CURSORON
                                 puts (CURSORON);
 #endif
-                                quit();
+                                exit(0);
                                 break;
 
                         case 0x12:
@@ -100,8 +101,101 @@ change_keys(void)
         	;
 }
 
+static void
+draw_move(int x0, int y0, int x1, int y1, int c0, int c1)
+{
+        if (y0 != y1)
+        {
+                put_at(x0, y0, c0);
+                put_at(x1, y1, c1);
+        }
+        else if (x0 < x1)
+        {
+                put_at(x0, y0, c0);
+                qputch(' ');
+                qputch(c1);
+                board[x1][y1] = c1;
+        }
+        else if (x0 > x1)
+        {
+                put_at(x1, y1, c1);
+                qputch(' ');
+                qputch(c0);
+                board[x0][y0] = c0;
+        }
+}
+
+static int
+same_boundary(int x1, int y1, int pos)
+{
+        register int    pred;
+        register int    succ;
+
+        if (ISBORDER(pos))
+        {
+                pred = pos == bord_min ? bord_max : pos - 1;
+                succ = pos == bord_max ? bord_min : pos + 1;
+        }
+        else
+        {
+                pred = pos == line_min + 1 ? line_max : pos - 1;
+                succ = pos == line_max ? line_min + 1 : pos + 1;
+        }
+        if (boundary[pred].x == x1 && boundary[pred].y == y1)
+                return pred;
+        if (boundary[succ].x == x1 && boundary[succ].y == y1)
+                return succ;
+        return 0;
+}
+
+static void
+where_move(int direction, int *dx, int *dy)
+{
+        switch (direction)
+        {
+                case UP:
+                        *dx = 0;
+                        *dy = -1;
+                        break;
+
+                case DOWN:
+                        *dx = 0;
+                        *dy = 1;
+                        break;
+
+                case LEFT:
+                        *dx = -1;
+                        *dy = 0;
+                        break;
+
+                case RIGHT:
+                        *dx = 1;
+                        *dy = 0;
+                        break;
+
+                case UP_LEFT:
+                        *dx = -1;
+                        *dy = -1;
+                        break;
+
+                case UP_RIGHT:
+                        *dx = 1;
+                        *dy = -1;
+                        break;
+
+                case DOWN_LEFT:
+                        *dx = -1;
+                        *dy = 1;
+                        break;
+
+                case DOWN_RIGHT:
+                        *dx = 1;
+                        *dy = 1;
+        }
+}
+
 int
-moveplayer()
+moveplayer(void)
 {
         register int    oldx;
         register int    oldy;
@@ -197,44 +291,20 @@ moveplayer()
         return ALIVE;
 }
 
-
-
 int
-same_boundary(x1, y1, pos)
-register int    x1;
-register int    y1;
-register int    pos;
+PLAYER_AT(int X, int Y)
 {
-        register int    pred;
-        register int    succ;
-
-        if (ISBORDER(pos))
-        {
-                pred = pos == bord_min ? bord_max : pos - 1;
-                succ = pos == bord_max ? bord_min : pos + 1;
-        }
-        else
-        {
-                pred = pos == line_min + 1 ? line_max : pos - 1;
-                succ = pos == line_max ? line_min + 1 : pos + 1;
-        }
-        if (boundary[pred].x == x1 && boundary[pred].y == y1)
-                return pred;
-        if (boundary[succ].x == x1 && boundary[succ].y == y1)
-                return succ;
-        return 0;
+	return (X == player.x && Y == player.y);
 }
 
-
-
-int movesparx()
+int
+movesparx(void)
 {
 	register struct sparxtype *s;
 	register int    i;
 	register int    dx;
 	register int    x1;
 	register int    y1;
-	register int    times;
 
 	for (i = 0, s = sparx; i < sparxnum; i++, s++) {
 		x1 = boundary[s->pos].x;
@@ -242,7 +312,7 @@ int movesparx()
 		if (PLAYER_AT(x1, y1) && last_killed > 10)
 			return DEAD;
 		put_at(x1, y1, board[x1][y1] == PLAYER ? PLAYER : BORDER);
-		for (times = 0; times < SPARX_SPEED; times++) {
+		for (int speed = 0; speed < SPARX_SPEED; speed++) {
 			if (s->dir == 1)
 				s->pos = s->pos == bord_max ? bord_min : s->pos + 1;
 			else
@@ -255,12 +325,10 @@ int movesparx()
 		put_at(x1, y1, SPARX);
 	} /* for */
 	return ALIVE;
-} /* movesparx */
-
-
+}
 
 int
-movefuse()
+movefuse(void)
 {
         if (fuse_lit)
         {
@@ -286,9 +354,33 @@ int sgn(x)
 		return(0);
 } /* sgn */
 
+static int
+there_move(int dx, int dy)
+{
+        if (dx>0)
+                if (dy>0)
+                        return(UP_RIGHT);
+                else if (dy)
+                        return(UP_LEFT);
+                else
+                        return(UP);
+        else if (dx)
+                if (dy>0)
+                        return(DOWN_RIGHT);
+                else if (dy)
+                        return(DOWN_LEFT);
+                else
+                        return(DOWN);
+        else if (dy>0)
+                return(RIGHT);
+        else if (dy)
+                return(LEFT);
+        else
+                return(UP);
+}
 
-
-int movequix()
+int
+movequix(void)
 {
 	register struct quixtype *q;
 	register int             i;
@@ -344,34 +436,3 @@ int movequix()
 	} /* for */
 	return ALIVE;
 } /* movequix */
-
-
-
-draw_move(x0, y0, x1, y1, c0, c1)
-register int    x0;
-register int    y0;
-register int    x1;
-register int    y1;
-register int    c0;
-register int    c1;
-{
-        if (y0 != y1)
-        {
-                put_at(x0, y0, c0);
-                put_at(x1, y1, c1);
-        }
-        else if (x0 < x1)
-        {
-                put_at(x0, y0, c0);
-                qputch(' ');
-                qputch(c1);
-                board[x1][y1] = c1;
-        }
-        else if (x0 > x1)
-        {
-                put_at(x1, y1, c1);
-                qputch(' ');
-                qputch(c0);
-                board[x0][y0] = c0;
-        }
-}
