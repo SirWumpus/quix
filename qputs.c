@@ -47,8 +47,8 @@ print(const char *s)
 void
 putint(unsigned i, int n)
 {
-        register int    a;
-        register int    j;
+        int    a;
+        int    j;
         char            s[20];
 
         a = 0;

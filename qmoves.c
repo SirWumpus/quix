@@ -128,8 +128,8 @@ draw_move(int x0, int y0, int x1, int y1, int c0, int c1)
 static int
 same_boundary(int x1, int y1, int pos)
 {
-        register int    pred;
-        register int    succ;
+        int    pred;
+        int    succ;
 
         if (ISBORDER(pos))
         {
@@ -197,11 +197,11 @@ where_move(int direction, int *dx, int *dy)
 int
 moveplayer(void)
 {
-        register int    oldx;
-        register int    oldy;
-        register int    newx;
-        register int    newy;
-        register int    nextb;
+        int    oldx;
+        int    oldy;
+        int    newx;
+        int    newy;
+        int    nextb;
         char            last_ch;
         int             dx;
         int             dy;
@@ -232,7 +232,7 @@ moveplayer(void)
                 return DEAD;
         if (nextb == BORDER)
         {
-                register int    position;
+                int    position;
 
                 last_ch = BORDER;
                 position = same_boundary(newx, newy, player.pos);
@@ -300,11 +300,11 @@ PLAYER_AT(int X, int Y)
 int
 movesparx(void)
 {
-	register struct sparxtype *s;
-	register int    i;
-	register int    dx;
-	register int    x1;
-	register int    y1;
+	struct sparxtype *s;
+	int    i;
+	int    dx;
+	int    x1;
+	int    y1;
 
 	for (i = 0, s = sparx; i < sparxnum; i++, s++) {
 		x1 = boundary[s->pos].x;
@@ -382,9 +382,9 @@ there_move(int dx, int dy)
 int
 movequix(void)
 {
-	register struct quixtype *q;
-	register int             i;
-	register int             j;
+	struct quixtype *q;
+	int             i;
+	int             j;
 
 	for (i = 0, q = quix; i < quixnum; i++, q++) {
 		if (board[q->x][q->y] == SOLID) continue;
@@ -405,8 +405,8 @@ movequix(void)
 				q->direction = there_move(dx, dy);
 			} /* if */
 			switch (board[q->x+dx][q->y+dy]) {
-				register int    i1;
-				register int    n;
+				int    i1;
+				int    n;
 
 				case LINE:
 					return DEAD;

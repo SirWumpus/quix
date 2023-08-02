@@ -29,8 +29,8 @@ short near_border(a, b)
 static int
 bound_pos(int x1, int y1)
 {
-	register int            i;
-	register struct coord   *b;
+	int            i;
+	struct coord   *b;
 
 	if (board[x1][y1] == BORDER || board[x1][y1] == BORDER_SOLID) {
 		for (i = bord_min, b = boundary + i; i <= bord_max; i++, b++)
@@ -47,13 +47,13 @@ bound_pos(int x1, int y1)
 }
 
 short line_near(i, j, at_border)
-	register int    i;
-	register int    j;
+	int    i;
+	int    j;
 	short           at_border;
 {
-	register char   c0;
-	register char   c1;
-	register char   border;
+	char   c0;
+	char   c1;
+	char   border;
 
 	c0 = board[i][j];
 	c1 = board[i][j+1];
@@ -61,8 +61,8 @@ short line_near(i, j, at_border)
 
 	if ((c0 == LINE_BORDER || c0 == border) &&
 		(c1 == LINE_BORDER || c1 == border) ){
-		register int    f0;
-		register int    f1;
+		int    f0;
+		int    f1;
 
 		f0 = bound_pos(i, j);
 		f1 = bound_pos(i, j+1);
@@ -96,8 +96,8 @@ short line_near(i, j, at_border)
 int
 find(int x1, int y1)
 {
-        register int            i;
-        register struct coord   *b;
+        int            i;
+        struct coord   *b;
 
         for (i = bord_min, b = boundary + i; i <= bord_max; i++, b++)
                 if (b->x == x1 && b->y == y1)
@@ -109,10 +109,10 @@ find(int x1, int y1)
 static int
 scan_screen(int draw, int border)
 {
-	register int    i;
-	register int    j;
-	register short  in;
-	register int    area;
+	int    i;
+	int    j;
+	short  in;
+	int    area;
 	int             quix_in;
 	int             quix_out;
 
@@ -202,9 +202,9 @@ void
 fill_area(void)
 {
 	unsigned        tpercent;       /* for percent calculation */
-	register int    i;
-	register int    j;
-	register struct quixtype *q;
+	int    i;
+	int    j;
+	struct quixtype *q;
 
 	min = find(boundary[line_max+1].x, boundary[line_max+1].y);
 	max = find(player.x, player.y);

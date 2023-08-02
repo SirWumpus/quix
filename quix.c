@@ -122,8 +122,8 @@ udelay(int d)
 void
 clearboard(void)
 {
-        register int    i;
-        register int    j;
+        int    i;
+        int    j;
 
         for (i = 2; i < xmax; i++)
                 for (j = 2; j < ymax; j++)
@@ -205,8 +205,8 @@ clearboard(void)
 void
 drawscreen(void)
 {
-        register int    i;
-        register int    j;
+        int    i;
+        int    j;
 
         clearscreen();
         lastx = 0;
@@ -233,7 +233,7 @@ drawscreen(void)
 static void
 death(void)
 {
-        register int    i;
+        int    i;
 
         if (percent >= 75)
                 return;
@@ -355,7 +355,7 @@ put_at(int x, int y, int ch)
 int
 main(int atrgc, char **argv)
 {
-	register char   ch;
+	char   ch;
 
 	(void) atexit(quit);
 
