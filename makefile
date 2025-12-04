@@ -5,8 +5,18 @@ O = .o
 E =
 .SUFFIXES : .c $O $E
 
-CFLAGS = -g
+CFLAGS =
 LDFLAGS =
+
+.c$O :
+	${CC} ${CFLAGS} -c $<
+
+.c$E :
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $*$E $<
+
+$O$E :
+	$(LD) $(LDFLAGS) $(CC_E)$*$E $*$O
+
 
 H = defs.h
 SRC = quix.c qarea.c qio.c qputs.c qmoves.c
@@ -23,7 +33,7 @@ distclean: clean
 	-rm -f quix$E
 
 tar:
-	tar -zcf quix.tar.gz makefile *.h *.c *.txt
+	tar -zcf quix.tar.gz makefile *.h *.c *.md *.png
 
 quix$E: ${OBJ}
 	${CC} ${LDFLAGS} -o quix$E ${OBJ}
@@ -42,4 +52,7 @@ qputs$O : defs.h qputs.c
 
 qmoves$O : defs.h qmoves.c
 	${CC} ${CFLAGS} -c qmoves.c
+
+list:
+	git ls-tree --full-tree -r --name-only HEAD
 
